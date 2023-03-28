@@ -1,0 +1,20 @@
+{
+    "name": "daoo/aula_03",
+    "autoload": {
+        "psr-4": {
+            "Daoo\\Aula03\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "JeanMaxSKrebs",
+            "email": "jeanmaxskrebs@gmail.com"
+        }
+    ],
+    "require": {},
+    "config": {
+        "allow-plugins": {
+            "ramsey/composer-repl": true
+        }
+    }
+}
