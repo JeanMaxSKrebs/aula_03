@@ -21,13 +21,16 @@ class Connection
             switch($db->drive){
                 case 'mysql':
                     $dsn = "mysql:host=$db->host;"
-                        ."dbname=$db->name;"
-                        ."charset=$db->charset";
+                        . "dbname=$db->name;"
+                        . "charset=$db->charset";
+                    $port = $db->port ?? 3306;
+                    $dsn.=";port=$port";
                     break;
                 case 'pgsql':
                     $dsn = "pgsql:host=$db->host;"
-                        ."port=$db->port;"
-                        ."dbname=$db->name;";
+                        . "dbname=$db->name;";
+                    $port = $db->port ?? 5432;
+                    $dsn.=";port=$port";
                     break;
                 default: throw new Exception("Driver $db->drive não suportado!");   
             }
