@@ -20,6 +20,38 @@ class Salao extends Controller
 		echo json_encode($this->model->read());
 	}
 
+	public function filter()
+	{
+		try {
+			$this->validateFilter();
+			error_log("teste");
+			
+			$this->model = new SalaoModel(
+				$_POST['key'],
+				$_POST['value'],
+			);
+			
+			$array = [$_POST['key'] => $_POST['value']];
+
+			$salao = $this->model->filter($array);
+			if ($salao) {
+				
+
+				echo json_encode(["success" => "Filtrado com sucesso!", 
+									"data" => $salao]);
+			}
+			else throw new Exception("Erro ao filtrar Salão!");
+			
+
+		} catch (Exception $error) {
+			$this->setHeader(500,'Erro interno do servidor!!!!');
+			echo json_encode([
+				"error" => $error->getMessage()
+			]);
+		}
+
+	}
+
 	public function show($id)
 	{
 		$salao = $this->model->read($id);
@@ -122,6 +154,16 @@ class Salao extends Controller
 			'descricao',
 			'localizacao',
 			'cnpj'
+		];
+		if (!$this->validatePostRequest($fields))
+			throw new Exception('Erro: campos incompletos!');
+	}
+
+	private function validateFilter()
+	{
+		$fields = [
+			'key',
+			'value'
 		];
 		if (!$this->validatePostRequest($fields))
 			throw new Exception('Erro: campos incompletos!');

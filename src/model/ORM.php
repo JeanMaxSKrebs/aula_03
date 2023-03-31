@@ -29,7 +29,7 @@ class ORM
     }
 
     private function resetMappers(){
-        $this->filters = '1';
+        $this->filters = '';
         $this->columns = '';
         $this->params = '';
         $this->updated = '';
@@ -56,17 +56,22 @@ class ORM
 
     protected function setFilters($arrayFilter)
     {
-        $this->values=[];
        
-        foreach ($arrayFilter as $key => $value){
-            $this->filters=$this->delimite($key)." ilike :$key";
-            $this->values[":$key"] = "%$value%";
-            break;
-        }
+        $this->filters = '';
+        $this->values = [];
+
+        $firstKey  = array_key_first($arrayFilter);
+        $firstValue = array_shift($arrayFilter);
         
-        array_shift($arrayFilter);
+        $compareOperator = 'like';
+        if(Connection::getDrive()=='pgsql')
+            $compareOperator = 'ilike';
+
+        $this->filters .= $this->delimite($firstKey)." $compareOperator :$firstKey";
+        $this->values[":$firstKey"] = "%$firstValue%";
+    
         foreach ($arrayFilter as $key => $value) {
-            $this->filters .= " AND ".$this->delimite($key)." ilike :$key";
+            $this->filters .= " AND ".$this->delimite($key)." $compareOperator  :$key";
             $this->values[":$key"] = "%$value%";
         }
     }
@@ -97,12 +102,11 @@ class ORM
         $prepStmt = $this->conn->prepare($sql);
         $prepStmt->bindValue(':id', $id);
 
-        if ($prepStmt->execute()) {
-            $this->dumpQuery($prepStmt);
-            return $prepStmt->fetchAll(self::FETCH);
-        }else{
+        if (!$prepStmt->execute())
             throw new Exception("Erro no select!");
-        }
+        
+        $this->dumpQuery($prepStmt);
+        return $prepStmt->fetchAll(self::FETCH);
     }
 
     protected function executeTransaction($sqlCommands, $parameters, $useLastId = false)
