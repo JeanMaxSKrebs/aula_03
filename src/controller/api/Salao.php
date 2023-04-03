@@ -37,8 +37,9 @@ class Salao extends Controller
 			if ($salao) {
 				
 
-				echo json_encode(["success" => "Filtrado com sucesso!", 
-									"data" => $salao]);
+				echo json_encode(["success" => "Filtrado com sucesso!",
+									"data" => $salao]
+								);
 			}
 			else throw new Exception("Erro ao filtrar Salão!");
 			
