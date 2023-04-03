@@ -85,6 +85,28 @@ class Salao extends ORM implements iDAO
             return $prepStmt->rowCount() > 0;
         else return false;
     }
+    public function where($arrayWhere)
+    {
+        error_log("ERRO: " . print_r($arrayWhere, TRUE));
+
+        try {
+            if (!sizeof($arrayWhere))
+                throw new Exception("Filtros vazios!");
+            $this->setWhere($arrayWhere);
+            error_log("ERRO: " . print_r($this->filters, TRUE));
+            $sql = "SELECT * FROM $this->table WHERE $this->filters";
+            $prepStmt = $this->conn->prepare($sql);
+            if (!$prepStmt->execute($this->values))
+                return false;
+            $this->dumpQuery($prepStmt);
+            return $prepStmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (Exception $error) {
+            error_log("ERRO: " . print_r($error, TRUE));
+            if(isset($prepStmt))
+                $this->dumpQuery($prepStmt);
+            throw new Exception($error->getMessage());
+        }
+    }
 
     public function filter($arrayFilter)
     {

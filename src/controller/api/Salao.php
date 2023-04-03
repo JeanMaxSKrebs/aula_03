@@ -20,6 +20,58 @@ class Salao extends Controller
 		echo json_encode($this->model->read());
 	}
 
+	public function where()
+	{
+		try {
+			// error_log("teste");
+			// print_r($_POST);
+
+			// echo json_encode(extract($_POST, EXTR_PREFIX_SAME, "prefixo")); pegar prefixo
+
+			
+			// $this->model = new SalaoModel(
+		
+			// );
+			
+			foreach($_POST as $field => $value)
+			{
+				$arrayKey[] = $field;
+				$arrayValue[] = $value;
+				
+				// echo json_encode($field);
+				// echo json_encode($value);
+				
+				$array[$field] = $value;
+			}
+			// error_log("teste");
+			// print_r($arrayKey);
+			// print_r($arrayValue);
+			// print_r($array);
+			
+			$this->validatePostRequest($array);
+
+			// $array = [$key => $value];
+
+			$salao = $this->model->where($array);
+			if ($salao) {
+				
+
+				echo json_encode(["success" => "Filtrado com WHERE com sucesso!\n",
+									"data" => $salao]
+								);
+			}
+			else throw new Exception("Erro ao filtrar Salao!");
+			
+
+		} catch (Exception $error) {
+			$this->setHeader(500,'Erro interno do servidor!!!!');
+			echo json_encode([
+				"error" => $error->getMessage()
+			]);
+		}
+
+	}
+
 	public function filter()
 	{
 		try {
@@ -169,4 +221,5 @@ class Salao extends Controller
 		if (!$this->validatePostRequest($fields))
 			throw new Exception('Erro: campos incompletos!');
 	}
+
 }

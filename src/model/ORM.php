@@ -54,6 +54,50 @@ class ORM
         }
     }
 
+
+    protected function setWhere($arrayWhere)
+    {
+       
+        $this->filters = '';
+        $this->values = [];
+
+		// print_r($_POST);
+
+        // foreach($_POST as $field => $value)
+        // {
+        //     $arrayKey[] = $field;
+        //     $arrayValue[] = $value;
+            
+        //     // echo json_encode($field);
+        //     // echo json_encode($value);
+            
+        //     $array[$field] = $value;
+        // }
+
+        // print_r($arrayKey);
+        // print_r($arrayValue);
+        // print_r($array);
+
+        $firstKey  = array_key_first($arrayWhere);
+        $firstValue = array_shift($arrayWhere);
+        
+        $compareOperator = 'like';
+        if(Connection::getDrive()=='pgsql')
+            $compareOperator = 'ilike';
+
+        $this->filters .= $this->delimite($firstKey)." $compareOperator :$firstKey";
+
+        $this->values[":$firstKey"] = "%$firstValue%" ;
+    
+        foreach ($arrayWhere as $key => $value) {
+            error_log("ERRO: " . print_r($this->filters, TRUE));
+
+            $this->filters .= " AND ".$this->delimite($key)." $compareOperator  :$key";
+            $this->values[":$key"] = "%$value%";
+        }
+    }
+
+
     protected function setFilters($arrayFilter)
     {
        

@@ -9,6 +9,6 @@ interface iDAO
     public function update();
     public function delete($id);
     
-    public function filter(array $filters);
+    // public function filter(array $filters);
     public function getColumns():array;
 }
