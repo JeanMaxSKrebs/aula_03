@@ -40,22 +40,57 @@ class Salao extends Controller
 				
 				// echo json_encode($field);
 				// echo json_encode($value);
-				
-				$array[$field] = $value;
+
+				$operador = explode(", ", $value, 2);
+				// echo json_encode($value);
+				// echo json_encode($operador[1]);
+
+				switch($operador[0]) {
+					case "=":
+						print_r("\nIGUAL\n");
+						// print_r($operador[1]);
+						$array[$field] = $operador[1];
+						$operador = $operador[0];
+						// print_r($operador[1]);
+						break;
+					case ">":
+						print_r("\nMAIOR\n");
+						$array[$field] = [$operador[0], $operador[1]];
+
+					break;
+					case "<":
+						print_r("\nMENOR\n");
+						$array[$field] = $operador[1];
+						$operador = $operador[0];
+					break;
+					case "!=":
+						print_r("\nDIFERENTE\n");
+						$array[$field] = $operador[1];
+						$operador = $operador[0];
+					break;
+					default:
+						print_r("\nSem Operador\n");
+						$array[$field] = $operador[0];
+				}
+				// print_r($operador[0]);
+
 			}
 			// error_log("teste");
 			// print_r($arrayKey);
 			// print_r($arrayValue);
-			// print_r($array);
+			// print_r($operador);
+			print_r($array);
+			// print_r($array[$field]);
+			// print_r($operador);
+
 			
 			$this->validatePostRequest($array);
 
 			// $array = [$key => $value];
 
-			$salao = $this->model->where($array);
+			$salao = $this->model->where($array, $operador);
+			
 			if ($salao) {
-				
-
 				echo json_encode(["success" => "Filtrado com WHERE com sucesso!\n",
 									"data" => $salao]
 								);
