@@ -85,36 +85,16 @@ class Salao extends ORM implements iDAO
             return $prepStmt->rowCount() > 0;
         else return false;
     }
-    public function where($arrayWhere, $operator)
+    public function where($arrayWhere)
     {
-        error_log("ERRO: " . print_r($arrayWhere, TRUE));
-        error_log("ERRO: " . print_r($operator, TRUE));
+        error_log("arraywhere: " . print_r($arrayWhere, TRUE));
 
         try {
             if (!sizeof($arrayWhere))
                 throw new Exception("Filtros vazios!");
             $this->setWhere($arrayWhere);
             error_log("ERRO: " . print_r($this->filters, TRUE));
-            error_log("Operator: " . print_r($operator, TRUE));
-            switch ($operator) {
-                case "=":
-                    error_log("entrou: ");
-                    $sql = "SELECT * FROM $this->table WHERE $this->filters like ";
-                break;
-                case ">":
 
-                break;
-                case "<":
-                    
-                break;
-                case "!=":
-
-                break;
-
-                default:
-                    $sql = "SELECT * FROM $this->table WHERE $this->filters";
-
-            }
             $sql = "SELECT * FROM $this->table WHERE $this->filters";
             $prepStmt = $this->conn->prepare($sql);
             if (!$prepStmt->execute($this->values))

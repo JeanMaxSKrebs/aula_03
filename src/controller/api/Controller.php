@@ -15,11 +15,17 @@ abstract class Controller{
 	}
 
 	protected function validatePostRequest(array $fields):bool{
-		foreach($fields as $field)
-			if(!isset($_POST[$field])){
+		error_log("Field   fi: " . print_r($fields, TRUE));
+		foreach($fields as $field) {
+			error_log(print_r($field, TRUE));
+			if(array_key_exists($field, $_POST[$field])) {
+				error_log("Field" . print_r($fields, TRUE));
+
+			} else if(!isset($_POST[$field])){
 				$this->setHeader(400,'Bad Request');
 				return false;
 			}
+		}
 		return true;
 	}
 }

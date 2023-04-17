@@ -60,26 +60,40 @@ class ORM
        
         $this->filters = '';
         $this->values = [];
-
-		// print_r($_POST);
-
-        // foreach($_POST as $field => $value)
-        // {
-        //     $arrayKey[] = $field;
-        //     $arrayValue[] = $value;
-            
-        //     // echo json_encode($field);
-        //     // echo json_encode($value);
-            
-        //     $array[$field] = $value;
-        // }
-
-        // print_r($arrayKey);
-        // print_r($arrayValue);
-        // print_r($array);
+        error_log("Array Where: 1" . print_r($arrayWhere, TRUE));
 
         $firstKey  = array_key_first($arrayWhere);
+
+        error_log("Array Where: 2" . print_r($arrayWhere, TRUE));
+
         $firstValue = array_shift($arrayWhere);
+
+        error_log("Array Where: 3" . print_r($arrayWhere, TRUE));
+
+        foreach ($arrayWhere as $string => $value) {
+            error_log("Array Where: 4" . print_r($string, TRUE));
+            error_log("Array Where: 5" . print_r($value, TRUE));
+        }
+
+        switch ($firstValue) {
+            case "=":
+                error_log("entrou: ");
+                $sql = "SELECT * FROM $this->table WHERE $this->filters like ";
+            break;
+            case ">":
+
+            break;
+            case "<":
+                
+            break;
+            case "!=":
+
+            break;
+
+            default:
+                $sql = "SELECT * FROM $this->table WHERE $this->filters";
+
+        }
         
         $compareOperator = 'like';
         if(Connection::getDrive()=='pgsql')

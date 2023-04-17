@@ -43,15 +43,14 @@ class Salao extends Controller
 
 				$operador = explode(", ", $value, 2);
 				// echo json_encode($value);
-				// echo json_encode($operador[1]);
+				echo json_encode($operador);
 
 				switch($operador[0]) {
 					case "=":
 						print_r("\nIGUAL\n");
-						// print_r($operador[1]);
-						$array[$field] = $operador[1];
-						$operador = $operador[0];
-						// print_r($operador[1]);
+						$array[$field] = [$operador[0], $operador[1]];
+						// $array[$field] = "'operador' => $operador[0] 'valor' => $operador[1]";
+
 						break;
 					case ">":
 						print_r("\nMAIOR\n");
@@ -60,13 +59,13 @@ class Salao extends Controller
 					break;
 					case "<":
 						print_r("\nMENOR\n");
-						$array[$field] = $operador[1];
-						$operador = $operador[0];
+						$array[$field] = [$operador[0], $operador[1]];
+
 					break;
 					case "!=":
 						print_r("\nDIFERENTE\n");
-						$array[$field] = $operador[1];
-						$operador = $operador[0];
+						$array[$field] = [$operador[0], $operador[1]];
+
 					break;
 					default:
 						print_r("\nSem Operador\n");
@@ -88,7 +87,7 @@ class Salao extends Controller
 
 			// $array = [$key => $value];
 
-			$salao = $this->model->where($array, $operador);
+			$salao = $this->model->where($array);
 			
 			if ($salao) {
 				echo json_encode(["success" => "Filtrado com WHERE com sucesso!\n",
@@ -256,5 +255,4 @@ class Salao extends Controller
 		if (!$this->validatePostRequest($fields))
 			throw new Exception('Erro: campos incompletos!');
 	}
-
 }
