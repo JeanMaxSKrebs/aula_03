@@ -5,7 +5,6 @@
 		"name":"daoo_pdo",
 		"charset":"utf8",
 		"user":"root",
-		"pass":"senha5",
-		"port":3309
+		"pass":"123456"
 	}
 }

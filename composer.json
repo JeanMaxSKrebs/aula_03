@@ -13,13 +13,14 @@
     ],
     "require": {},
     "scripts":{
-        "api":"php -S localhost:8081 src/index.php",
+        "api":"php -S 127.0.0.1:8081 src/index.php",
         "web":"php -S localhost:8080 -t src/web/",
         "kill":"kill -9  $(ps -ax -o pid,command| grep 'php -S localhost:8081' | grep -v 'grep' | head -n 1 | cut -f 2 -d ' ')",
         "restart": "composer run kill; composer run api",
         "port": "sudo lsof -i :8081"
     },
     "config": {
+        "process-timeout": 1800,
         "allow-plugins": {
             "ramsey/composer-repl": true
         }

@@ -7,14 +7,14 @@ use PDO;
 
 class ORM
 {
-    protected $conn;    //connection
+    protected $conn; //connection
 
-    protected $table;   //tableName
+    protected $table; //tableName
     protected $primary; //primary Key
     protected $columns; //columnNames
-    protected $params;  //:columnNames
+    protected $params; //:columnNames
     protected $updated; //set columnNames=:columnNames
-    protected $values;  //array values
+    protected $values; //array values
     protected $filters; //like
     private $delimiter; //Delmitadores de campo
     protected const FETCH = PDO::FETCH_ASSOC;
@@ -24,11 +24,12 @@ class ORM
         $this->conn = Connection::getConnection();
         $this->resetMappers();
         $this->delimiter = '`';
-        if(Connection::getDrive()=='pgsql')
+        if (Connection::getDrive() == 'pgsql')
             $this->delimiter = "\"";
     }
 
-    private function resetMappers(){
+    private function resetMappers()
+    {
         $this->filters = '';
         $this->columns = '';
         $this->params = '';
@@ -38,15 +39,15 @@ class ORM
 
     protected function mapColumns(iDAO $daoInterface)
     {
-        if(count($this->values))
+        if (count($this->values))
             $this->resetMappers();
 
         if (isset($daoInterface)) {
             foreach ($daoInterface->getColumns() as $key => $value) {
                 $this->params .= " :$key,";
                 $this->columns .= " $key,";
-                $this->values[":$key"] = is_bool($value) ? (int)$value : $value;
-                $this->updated .= $this->delimite($key)." = :$key,";//POSTGRE
+                $this->values[":$key"] = is_bool($value) ? (int) $value : $value;
+                $this->updated .= $this->delimite($key) . " = :$key,"; //POSTGRE
             }
             $this->params = substr($this->params, 0, strlen($this->params) - 1);
             $this->columns = substr($this->columns, 0, strlen($this->columns) - 1);
@@ -57,99 +58,95 @@ class ORM
 
     protected function setWhere($arrayWhere)
     {
-       
         $this->filters = '';
         $this->values = [];
-        error_log("Array Where: 1" . print_r($arrayWhere, TRUE));
 
-        $firstKey  = array_key_first($arrayWhere);
+        $firstKey = array_key_first($arrayWhere);
+        // print_r('/nprimeirakey' . $firstKey);
 
-        error_log("Array Where: 2" . print_r($arrayWhere, TRUE));
+        $dados = array_shift($arrayWhere);
 
-        $firstValue = array_shift($arrayWhere);
-
-        error_log("Array Where: 3" . print_r($arrayWhere, TRUE));
-
-        foreach ($arrayWhere as $string => $value) {
-            error_log("Array Where: 4" . print_r($string, TRUE));
-            error_log("Array Where: 5" . print_r($value, TRUE));
+        $operator = '';
+        $firstValue = '';
+        if (is_array($dados)) {
+            $operator = $dados[0];
+            $firstValue = $dados[1];
+        } else {
+            $operator = '=';
+            $firstValue = $dados;
         }
 
-        switch ($firstValue) {
-            case "=":
-                error_log("entrou: ");
-                $sql = "SELECT * FROM $this->table WHERE $this->filters like ";
-            break;
-            case ">":
-
-            break;
-            case "<":
-                
-            break;
-            case "!=":
-
-            break;
-
-            default:
-                $sql = "SELECT * FROM $this->table WHERE $this->filters";
-
+        if (is_numeric($firstValue)) {
+            // $firstValue é um número inteiro
+            $this->filters .= $this->delimite($firstKey) . " $operator :$firstKey";
+            $this->values[":$firstKey"] = (int) $firstValue;
+        } else {
+            // $firstValue é uma string
+            $this->filters .= $this->delimite($firstKey) . " $operator :$firstKey";
+            $this->values[":$firstKey"] = "%$firstValue%";
         }
-        
-        $compareOperator = 'like';
-        if(Connection::getDrive()=='pgsql')
-            $compareOperator = 'ilike';
 
-        $this->filters .= $this->delimite($firstKey)." $compareOperator :$firstKey";
-
-        $this->values[":$firstKey"] = "%$firstValue%" ;
-    
+        $cont = 0;
         foreach ($arrayWhere as $key => $value) {
-            error_log("ERRO: " . print_r($this->filters, TRUE));
+            $cont++;
+            // print_r("cont: " . $cont . "\n");
+            // print_r("key: " . $key . "\n");
 
-            $this->filters .= " AND ".$this->delimite($key)." $compareOperator  :$key";
+            if (is_array($value)) {
+                $operator = $value[0];
+                $value = $value[1];
+            }
+            // print_r("op: " . $operator . "\n");
+            // print_r("value: " . $value . "\n");
+
+            $this->filters .= " AND " . $this->delimite($key) . " $operator :$key";
             $this->values[":$key"] = "%$value%";
+
+            // print_r($this->filters);
         }
+
     }
+
 
 
     protected function setFilters($arrayFilter)
     {
-       
+
         $this->filters = '';
         $this->values = [];
 
-        $firstKey  = array_key_first($arrayFilter);
+        $firstKey = array_key_first($arrayFilter);
         $firstValue = array_shift($arrayFilter);
-        
+
         $compareOperator = 'like';
-        if(Connection::getDrive()=='pgsql')
+        if (Connection::getDrive() == 'pgsql')
             $compareOperator = 'ilike';
 
-        $this->filters .= $this->delimite($firstKey)." $compareOperator :$firstKey";
+        $this->filters .= $this->delimite($firstKey) . " $compareOperator :$firstKey";
         $this->values[":$firstKey"] = "%$firstValue%";
-    
+
         foreach ($arrayFilter as $key => $value) {
-            $this->filters .= " AND ".$this->delimite($key)." $compareOperator  :$key";
+            $this->filters .= " AND " . $this->delimite($key) . " $compareOperator  :$key";
             $this->values[":$key"] = "%$value%";
         }
     }
 
-    protected function select(array $columns=[])
+    protected function select(array $columns = [])
     {
         $selectedColumns = '';
-        foreach($columns as $column)
-            $selectedColumns .=", $column";
+        foreach ($columns as $column)
+            $selectedColumns .= ", $column";
 
-        if(!$columns)
+        if (!$columns)
             $selectedColumns = "*";
-        
+
         $sql = "SELECT $selectedColumns FROM $this->table";
         $prepStmt = $this->conn->prepare($sql);
 
         if ($prepStmt->execute()) {
             $this->dumpQuery($prepStmt);
             return $prepStmt->fetchAll(self::FETCH);
-        }else{
+        } else {
             throw new Exception("Erro no select!");
         }
     }
@@ -162,7 +159,7 @@ class ORM
 
         if (!$prepStmt->execute())
             throw new Exception("Erro no select!");
-        
+
         $this->dumpQuery($prepStmt);
         return $prepStmt->fetchAll(self::FETCH);
     }
@@ -188,15 +185,17 @@ class ORM
         ob_end_clean();
     }
 
-    protected function lastId(){
-        if(Connection::getDrive()=='pgsql'){
-            $sequenceName = $this->table."_".$this->primary."_seq";
+    protected function lastId()
+    {
+        if (Connection::getDrive() == 'pgsql') {
+            $sequenceName = $this->table . "_" . $this->primary . "_seq";
             return $this->conn->lastInsertId($sequenceName);
         }
         return $this->conn->lastInsertId();
     }
 
-    private function delimite($field){
-        return $this->delimiter.$field.$this->delimiter;
+    private function delimite($field)
+    {
+        return $this->delimiter . $field . $this->delimiter;
     }
 }

@@ -67,6 +67,11 @@ class Salao extends Controller
 						$array[$field] = [$operador[0], $operador[1]];
 
 					break;
+					case "like":
+						print_r("\nDIFERENTE\n");
+						$array[$field] = [$operador[0], $operador[1]];
+
+					break;
 					default:
 						print_r("\nSem Operador\n");
 						$array[$field] = $operador[0];
@@ -75,10 +80,10 @@ class Salao extends Controller
 
 			}
 			// error_log("teste");
-			// print_r($arrayKey);
+			// prsint_r($arrayKey);
 			// print_r($arrayValue);
 			// print_r($operador);
-			print_r($array);
+			// print_r($array);
 			// print_r($array[$field]);
 			// print_r($operador);
 
@@ -118,8 +123,9 @@ class Salao extends Controller
 			);
 			
 			$array = [$_POST['key'] => $_POST['value']];
-
+			// print_r($array);
 			$salao = $this->model->filter($array);
+			// print_r($salao);
 			if ($salao) {
 				
 

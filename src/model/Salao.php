@@ -92,10 +92,11 @@ class Salao extends ORM implements iDAO
         try {
             if (!sizeof($arrayWhere))
                 throw new Exception("Filtros vazios!");
-            $this->setWhere($arrayWhere);
+            
             error_log("ERRO: " . print_r($this->filters, TRUE));
-
+            $this->setWhere($arrayWhere);
             $sql = "SELECT * FROM $this->table WHERE $this->filters";
+            print_r($sql);
             $prepStmt = $this->conn->prepare($sql);
             if (!$prepStmt->execute($this->values))
                 return false;
@@ -114,8 +115,10 @@ class Salao extends ORM implements iDAO
         try {
             if (!sizeof($arrayFilter))
                 throw new Exception("Filtros vazios!");
+
             $this->setFilters($arrayFilter);
             $sql = "SELECT * FROM $this->table WHERE $this->filters";
+            print_r($sql);
             $prepStmt = $this->conn->prepare($sql);
             if (!$prepStmt->execute($this->values))
                 return false;
