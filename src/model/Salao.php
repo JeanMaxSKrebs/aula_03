@@ -6,12 +6,13 @@ use Exception;
 
 class Salao extends ORM implements iDAO
 {
-    private $id, $nome, $descricao, $localizacao, $cnpj;
+    private $id, $nome, $descricao, $localizacao, $cnpj, $capacidade;
 
     public function __construct(
         $nome = '',
         $descricao = '',
         $localizacao = '',
+        $capacidade = 0,
         $cnpj = 0
     ) {
         parent::__construct();
@@ -21,8 +22,42 @@ class Salao extends ORM implements iDAO
         $this->nome = $nome;
         $this->descricao = $descricao;
         $this->localizacao = $localizacao;
+        $this->capacidade = $capacidade;
         $this->cnpj = $cnpj;
         $this->mapColumns($this);
+        // $this->executeTransaction($sql);
+    }
+
+    public function aumentarCapacidade($idUsuario, $valor)
+    {
+        try {
+            $this->conn->beginTransaction();
+
+            // primeiro, selecione o saldo atual do usuário
+            $stmt = $this->conn->prepare("SELECT capacidade FROM saloes WHERE id = :id");
+            $stmt->bindParam(':id', $idUsuario);
+            $stmt->execute();
+            $capacidadeAtual = $stmt->fetchColumn();
+
+            // em seguida, atualize o saldo do usuário
+            $stmt = $this->conn->prepare("UPDATE saloes SET capacidade = :novaCapacidade WHERE id = :id");
+            $stmt->bindValue(':novaCapacidade', $capacidadeAtual + $valor);
+            $stmt->bindValue(':id', $idUsuario);
+            $stmt->execute();
+
+            // finalmente, registre a transação em uma tabela de histórico
+            $stmt = $this->conn->prepare("INSERT INTO transacoes (id_salao, valor) VALUES (:id_salao, :valor)");
+            $stmt->bindValue(':id_salao', $idUsuario);
+            $stmt->bindValue(':valor', $valor);
+            $stmt->execute();
+
+            $this->conn->commit();
+
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            return false;
+        }
     }
 
     public function read($id = null)
@@ -96,7 +131,6 @@ class Salao extends ORM implements iDAO
             error_log("ERRO: " . print_r($this->filters, TRUE));
             $this->setWhere($arrayWhere);
             $sql = "SELECT * FROM $this->table WHERE $this->filters";
-            print_r($sql);
             $prepStmt = $this->conn->prepare($sql);
             if (!$prepStmt->execute($this->values))
                 return false;
@@ -138,7 +172,8 @@ class Salao extends ORM implements iDAO
             "nome" => $this->nome,
             "descricao" => $this->descricao,
             "localizacao" => $this->localizacao,
-            "cnpj" => $this->cnpj
+            "cnpj" => $this->cnpj,
+            "capacidade" => $this->capacidade
         ];
         if($this->id) $columns[$this->primary]=$this->id;
         return $columns;

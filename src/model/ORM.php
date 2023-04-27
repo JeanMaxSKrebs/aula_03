@@ -163,19 +163,34 @@ class ORM
         $this->dumpQuery($prepStmt);
         return $prepStmt->fetchAll(self::FETCH);
     }
-
-    protected function executeTransaction($sqlCommands, $parameters, $useLastId = false)
+    public function executeTransaction($queries)
     {
+        $pdo = $this->connect();
+        $pdo->beginTransaction();
         try {
-            $this->conn->beginTransaction();
-            //implementar   
-        } catch (\PDOException $error) {
-            var_dump([$error->getMessage(), $error->getTraceAsString()]);
-            $this->conn->rollBack();
-            unset($this->conn);
-            return false;
+            foreach ($queries as $query) {
+                $stmt = $pdo->prepare($query['sql']);
+                $stmt->execute($query['params']);
+            }
+            $pdo->commit();
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            throw $e;
         }
     }
+
+    // protected function executeTransaction($sqlCommands, $parameters, $useLastId = false)
+    // {
+    //     try {
+    //         $this->conn->beginTransaction();
+    //         //implementar   
+    //     } catch (\PDOException $error) {
+    //         var_dump([$error->getMessage(), $error->getTraceAsString()]);
+    //         $this->conn->rollBack();
+    //         unset($this->conn);
+    //         return false;
+    //     }
+    // }
 
     protected function dumpQuery($prepStatement)
     {

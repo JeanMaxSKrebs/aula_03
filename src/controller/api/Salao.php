@@ -246,7 +246,8 @@ class Salao extends Controller
 			'nome',
 			'descricao',
 			'localizacao',
-			'cnpj'
+			'cnpj',
+			'capacidade'
 		];
 		if (!$this->validatePostRequest($fields))
 			throw new Exception('Erro: campos incompletos!');
